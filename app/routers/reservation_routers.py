@@ -17,7 +17,7 @@ router = APIRouter(tags=["Reservations"])
 @router.get("/reservations/", response_model=List[ReservationResponse])
 async def get_reservations(db: AsyncSession = Depends(get_db)):  # noqa: B008
     return (
-        (await db.execute(select(Reservation).options(joinedload(Reservation.table))))
+        (await db.execute(select(Reservation).options(joinedload(Reservation.tables))))
         .scalars()
         .unique()
         .all()

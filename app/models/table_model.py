@@ -5,13 +5,13 @@ from app.database.database import Base
 
 
 class Table(Base):
-    __tablename__ = "table"
+    __tablename__ = "tables"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String)
     seats: Mapped[int] = mapped_column(Integer)
     location: Mapped[str] = mapped_column(String)
 
-    reservation: Mapped["Reservation"] = relationship(  # type: ignore # noqa
-        "Reservation", back_populates="table", cascade="all, delete"
+    reservations: Mapped["Reservation"] = relationship(  # type: ignore # noqa
+        "Reservation", back_populates="tables", cascade="all, delete"
     )

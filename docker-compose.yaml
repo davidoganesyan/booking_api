@@ -28,7 +28,7 @@ services:
       - booking_net
     command: uvicorn main:app --host 0.0.0.0 --port 8000
     volumes:
-      - application:/application
+      - .:/app
     depends_on:
       - db
     ports:
@@ -40,4 +40,3 @@ networks:
 
 volumes:
   postgres-data:
-  application:

@@ -10,7 +10,7 @@ class ReservationResponse(BaseModel):
     customer_name: str
     reservation_time: datetime
     duration_minutes: int
-    table: TableResponse
+    tables: TableResponse
 
     model_config = ConfigDict(
         from_attributes=True,
