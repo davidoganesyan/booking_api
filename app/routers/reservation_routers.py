@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -36,35 +36,38 @@ async def create_reservation(
     new_start = reservation_data.reservation_time
     new_end = new_start + timedelta(minutes=reservation_data.duration_minutes)
 
-    # existing = await db.execute(
-    #     select(Reservation).where(
-    #         Reservation.table_id == reservation_data.table_id,
-    #         and_(
-    #             # Конец существующей резервации > начала новой
-    #             func.datetime(
-    #                 Reservation.reservation_time,
-    #                 text("'+' || duration_minutes || ' minutes'"),
-    #             )
-    #             > new_start,
-    #             # Начало существующей резервации < конца новой
-    #             Reservation.reservation_time < new_end,
-    #         ),
-    #     )
-    # )
+    dialect_name = db.get_bind().dialect.name
 
-    existing = await db.execute(
-        select(Reservation).where(
-            Reservation.table_id == reservation_data.table_id,
-            and_(
-                (
-                    Reservation.reservation_time
-                    + func.make_interval(0, 0, 0, 0, 0, Reservation.duration_minutes)
-                )
-                > new_start,
-                Reservation.reservation_time < new_end,
-            ),
+    if dialect_name != "postgresql":
+        existing = await db.execute(
+            select(Reservation).where(
+                Reservation.table_id == reservation_data.table_id,
+                and_(
+                    func.datetime(
+                        Reservation.reservation_time,
+                        text("'+' || duration_minutes || ' minutes'"),
+                    )
+                    > new_start,
+                    Reservation.reservation_time < new_end,
+                ),
+            )
         )
-    )
+    else:
+        existing = await db.execute(
+            select(Reservation).where(
+                Reservation.table_id == reservation_data.table_id,
+                and_(
+                    (
+                        Reservation.reservation_time
+                        + func.make_interval(
+                            0, 0, 0, 0, 0, Reservation.duration_minutes
+                        )
+                    )
+                    > new_start,
+                    Reservation.reservation_time < new_end,
+                ),
+            )
+        )
 
     if existing.scalars().first():
         raise HTTPException(400, "Table already reserved")

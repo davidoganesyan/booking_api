@@ -20,16 +20,20 @@
 ### Запуск проекта
 1. Склонируйте репозиторий:
    ```bash
-   git clone https://github.com/username/tweet-api.git
+   git clone https://github.com/davidoganesyan/booking_api
 2. Настройка контейнеров
     ```bash
    docker compose build
-3. Подготовка БД и миграций
+3. Запуск контейнера БД в фоновом режиме
     ```bash
-   docker compose up -d db  # запуска контейнера БД в фоновом режиме
-   docker compose run api alembic revision --autogenerate -m "Initial migration" # Создаем начальную миграцию
-   docker compose run api alembic upgrade head # применяем созданную миграцию
-4. Запуск приложения
+   docker compose up -d db
+4. Создание начальной миграции
+    ```bash
+   docker compose run api alembic revision --autogenerate -m "Initial migration"
+5. Применяем начальную миграцию
+    ```bash
+   docker compose run api alembic upgrade head
+6. Запуск приложения
     ```bash   
    docker compose up  
 
